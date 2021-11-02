@@ -1,0 +1,34 @@
+<script src="react.development.js"></script>
+<script src="react-dom.development.js"></script>
+<script src="babel.js"></script>
+
+
+<div id="root"></div>
+
+<script type="text/babel">
+
+   class Signup extends React.Component {
+
+      fnOnChange(eve) {
+        debugger;
+        let res=eve.target.value;
+        console.log(eve.target.value);
+         this.refs.result.innerText=res*74.5;
+      }
+
+      render() {
+         return <div>
+            <h1>Dollar Convertor into rupees</h1>
+            <p>
+               Name:<input name="name" onChange={this.fnOnChange.bind(this)} />
+            </p>
+
+            <h1 ref="result"></h1>
+
+         </div>
+      }
+   }
+
+   ReactDOM.render(<Signup />, document.getElementById('root'));
+
+</script>

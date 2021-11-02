@@ -1,0 +1,173 @@
+<script src="react.development.js"></script>
+<script src="react-dom.development.js"></script>
+<script src="babel.js"></script>
+
+<head>
+   <link rel="stylesheet" href="style.css">
+</head>
+
+<div id="root"></div>
+
+<script type="text/babel">
+
+   class Signup extends React.Component {
+
+      constructor() {
+         super();
+         this.fnOnChange = this.fnOnChange.bind(this);
+         this.Signup = this.Signup.bind(this);
+         this.state = {
+            dataObj: {
+               name: '',
+               uid: '',
+               pwd: '',
+               gender: 'M',
+               hobbies: 'cricket',
+               country: 'DUB',
+               address: ''
+            },
+            result: '',
+            isdisabbled: false
+         }
+         this.CbArr = ['cricket']; //for storing the hobbies
+      }
+
+      Signup() {
+         this.setState({
+            isdisabbled: true
+         })
+         let o = new XMLHttpRequest(); //creating a object of XMLHttpRequest to send the request 
+
+         o.open("post", "http://localhost:2020/std/std-reg"); //open is a method of XMLHttpResponse which uses to send the request with two arguments method and url
+
+         o.setRequestHeader('Content-Type', 'application/json'); //we are setting RequestHeader from text/plain to json object so that server can read it
+
+         o.send(JSON.stringify(this.state.dataObj)); //it is used to send the data along with request but it can pass only string to it so we have to pasrse the object with string using JSON.stringify
+
+         o.onload = () => { //onload is a method of httpresponse which is used for the success message
+            debugger;
+            let result = o.responseText;  //returns the success response
+            console.log(result);
+            debugger;
+            result = JSON.parse(result); //parsing the string data into the object format
+            let res = "Data Insertion Failed";
+            if (result.affectedRows > 0) { //if succesfully inserted then affected rows will be greater than 1 else < 0
+               res = "Inserted succesfully";
+            }
+            this.setState({
+               isdisabbled: false,
+               result: res,
+               dataobj: {
+                  name: '',
+                  uid: '',
+                  pwd: '',
+                  gender: 'M',
+                  hobbies: 'cricket',
+                  country: 'DUB',
+                  address: ''
+               }
+            })
+         }
+
+         o.onerror = () => {
+            debugger;
+            o.responseText;
+            this.setState({
+               isdisabbled: false,
+               result: res,
+               dataObj: {
+                  name: '',
+                  uid: '',
+                  pwd: '',
+                  gender: 'M',
+                  hobbies: 'cricket',
+                  country: 'DUB',
+                  address: ''
+               }
+            })
+         }
+      }
+
+
+      fnOnChange(eve) {
+         debugger;
+         const { name, value, checked, type } = eve.target; //object destruction from eve.target
+
+         if (type == "checkbox") {  //checking if type is checkbox
+            if (checked) {  //if it is checked the push it
+               debugger;
+               this.CbArr.push(name);
+            }
+            else {   //if not pop it
+               debugger;
+               this.CbArr.splice(this.CbArr.indexOf(name), 1);
+            }
+            this.setState({
+               dataObj: {
+                  ...this.state.dataObj,
+                  'hobbies': this.CbArr.join()  //add hobbies with rest of the key-value pair
+               }
+            })
+         }
+         else {
+            this.setState({
+               dataObj: {
+                  ...this.state.dataObj, //mergeing the new key-value pair with old one's
+                  [name]: value //for key and value pair
+               }
+            })
+         }
+
+      }
+
+      render() {
+         const { name, gender, hobbies, country } = this.state.dataObj;
+         let isCric = hobbies.includes('cricket');  //checking if cricket is there in the hobbies key's value or not 
+         let isFoot = hobbies.includes('football'); //same for it 
+         let isChes = hobbies.includes('chess');   //also same for it
+
+         return <div>
+            <h1>Registration Form</h1>
+            <p>
+               <b class="input">Name</b>:<input name="name" value={name} class="input2" onChange={this.fnOnChange} />
+            </p>
+            <p>
+               <b class="input">UID</b>:<input name="uid" class="input2" onChange={this.fnOnChange} />
+            </p>
+            <p>
+               <b class="input">password:</b><input type="password" class="input2" name="pwd" onChange={this.fnOnChange} />
+            </p>
+            <p>
+               <b class="input">Gender:</b><input checked={gender == "M"} type="radio" value="M" class="input" name="gender" onChange={this.fnOnChange} />Male
+               <input type="radio" name="gender" value="F" checked={gender == "F"} onChange={this.fnOnChange} />Female
+            </p>
+            <p>
+               <b class="input">Hobbies:</b><input type="checkbox" checked={isCric} class="input" name="criket" onChange={this.fnOnChange} />Cricket
+               <input type="checkbox" checked={isFoot} name="football" onChange={this.fnOnChange} />Football
+               <input type="checkbox" checked={isChes} name="chess" onChange={this.fnOnChange} />Chess
+            </p>
+            <p>
+               <b class="input">Country:</b><select name="country" class="input" onChange={this.fnOnChange}>
+                  <option selected={country == "IND"} value="IND">India</option>
+                  <option selected={country == "DUB"} value="DUB">Dubai</option>
+                  <option selected={country == "USA"} value="USA">USA</option>
+               </select>
+            </p>
+            <p>
+               <b class="input">Address:</b><textarea class="input" name="address" onChange={this.fnOnChange}></textarea>
+            </p>
+            <p>
+               <b class="input"><button disabled={this.state.isdisabbled} class="input" onClick={this.Signup.bind(this)}>Register</button></b>
+
+               {this.state.isdisabbled && <span>processing...</span>}
+
+               <h2>{this.state.result}</h2>
+            </p>
+
+         </div>
+      }
+   }
+
+   ReactDOM.render(<Signup />, document.getElementById('root'));
+
+</script>

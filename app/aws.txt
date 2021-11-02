@@ -1,0 +1,16 @@
+Content-Type: multipart/mixed; boundary="//"
+MIME-Version: 1.0
+
+--//
+Content-Type: text/cloud-config; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment; filename="cloud-config.txt"
+
+#cloud-config
+cloud_final_modules:
+- [users-groups, once]
+users:
+     -name: ec2-user
+     ssh-authorized-keys:
+     -ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCWGWMmyUBbUksIZcTuTQt5Pl6vQYsALPe2uwG7f+3tgbeRQcvBdpkw9OJ1CFVjw/fT6qw+2jUrf8+fVmDbIt3Cx3p6Bw8gHUFSs0ovDdk5zPbQCx2jc6c3gct/UAtLn4WTkgvVpTRz9zjXPJqCSJxvV+V9ooHM2EcR9vy3FUFJqfK2HOl9TYoi9YbGJblQLjcIMRw+MndKETo9TmSdre3WIECRIVAn+ZrE/Q8phWOJS22mTzhc15WsTIy1EqqkSnOQ8c3vbKk1J1z3622TfQwDhcJbAwtcbg7uop8bfdFmN9QVPaRNTOvGb9UHO7Khgy63uOxySSBj6IB5/DzYfcuF alambhai

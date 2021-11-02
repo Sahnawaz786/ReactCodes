@@ -1,0 +1,103 @@
+<script src="babel.js"></script>
+
+<script src="react.development.js"></script>
+
+<script src="react-dom.development.js"></script>
+
+<head>
+    <link rel="stylesheet" href="style.css">
+ </head>
+
+<div id='root'></div>
+
+<script type="text/babel">
+
+class App extends React.Component{
+
+    constructor(){
+        super();
+        this.fnfees=this.fnfees.bind(this);
+        this.fnOnchange=this.fnOnchange.bind(this);
+        this.state={
+            dataObj:{
+
+            },
+            fees:0,
+        }
+        this.cbArr=[];
+    }
+
+    fnfees(){
+        let o=new XMLHttpRequest();
+
+        o.open("post","http://localhost:2020/std/std-fees");
+
+        o.setRequestHeader("Content-Type","application/json");
+
+        o.send(JSON.stringify(this.state.dataObj));
+
+        o.onload=function(){
+            o.responseText;
+        }
+
+        o.onerror=function(){
+            o.responseText;
+        }
+    }
+
+    fnOnchange(eve){
+        const {name,value,type,checked} = eve.target;
+
+        if(type=="checkbox"){
+              if(checked){
+                  this.cbArr.push(name);
+              }
+              else{
+                  this.cbArr.splice(this.cbArr.indexOf(name),1);
+              }
+              let fees=this.cbArr.length;
+              this.setState({
+                  dataObj:{
+                  ...this.state.dataObj,
+                  "Fees":this.cbArr.join(),
+                  fees:fees*3000
+              }
+              })
+        }
+        else{
+        this.setState({
+            dataObj:{
+                ...this.state.dataObj,
+                [name]:value
+            }
+        })
+    }
+    }
+
+    render(){
+        return <div>
+            <h1 className="input">Fees:Payment Of Monthly Fees</h1>
+            <p>
+               Name:<input className="input2" name="name" onChange={this.fnOnchange}/>
+            </p>
+            <p>
+               Marks:<input name="marks" className="input2" onChange={this.fnOnchange}/>
+            </p>
+            <p>
+               percentage:<input name="percentage" className="input2" onChange={this.fnOnchange}/>
+            </p>
+            <p>
+               <b className="input">Terms:</b><input type="checkbox" name="1st term" onChange={this.fnOnchange} />Firts-term
+               <input type="checkbox" name="2nd term" onChange={this.fnOnchange}/>Half-yearly
+               <input type="checkbox" name="3rd term" onChange={this.fnOnchange}/>3rd term
+               <input type="checkbox" name="Annual" onChange={this.fnOnchange} />Annual
+            </p>
+            
+            <button className="input" onClick={this.fnfees}>Save</button>
+        </div>
+    }
+}
+
+ReactDOM.render(<App />,document.getElementById('root'));
+
+</script>

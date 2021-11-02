@@ -1,0 +1,317 @@
+<script src="babel.js"></script>
+
+<script src="react.development.js"></script>
+
+<script src="react-dom.development.js"></script>
+
+<script src="jquery-3.6.0.min.js"></script>
+
+<script src="axios.min.js"></script>
+
+<head>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<div id='root'></div>
+
+<script type="text/babel">
+
+    class App extends React.Component {
+
+        constructor() {
+            super();
+            this.fnfees = this.fnfees.bind(this);
+            this.fnOnchange = this.fnOnchange.bind(this);
+            this.fngetdata = this.fngetdata.bind(this);
+            this.fnresetMsg = this.fnresetMsg.bind(this);
+            this.state = {
+                dataObj: {
+                    name: '',
+                    uid: '',
+                    classes: '',
+                    fees: 'Jan-Mar'
+                },
+                result: '',
+                isdisabled: false,
+                students: [],
+                isEdit: false
+            }
+            this.cbArr = [];
+            // this.fngetdata();
+        }
+
+        fnfees() {
+            this.setState({
+                isdisabled: true
+            })
+            let o = new XMLHttpRequest();
+
+            o.open("post", "http://localhost:2020/std/std-fees");
+
+            o.setRequestHeader("Content-Type", "application/json");
+
+            o.send(JSON.stringify(this.state.dataObj));
+
+            o.onload = () => {
+                let res = o.responseText;
+                res = JSON.parse(res);
+                let result = "Data Insertion Failed!";
+                if (res.affectedRows > 0) {
+                    result = "Data Inserted Succesfully!";
+                    this.fngetdata();
+                }
+
+                this.setState({
+                    dataObj: {
+                        name: '',
+                        uid: '',
+                        classes: '',
+                        fees: 'Jan-Mar'
+                    },
+                    isdisabled: false,
+                    result: result
+                })
+
+                this.fnresetMsg();
+
+            }
+
+            o.onerror = () => {
+                o.responseText;
+
+                this.setState({
+                    dataObj: {
+                        name: '',
+                        uid: '',
+                        classes: '',
+                        fees: 'Jan-Mar'
+                    }
+                })
+            }
+        }
+
+        fnresetMsg() {
+            setTimeout(() => {
+                this.setState({
+                    result: ''
+                })
+            }, 3000);
+
+        }
+
+        fnEdit() {
+            $.post('http://localhost:2020/std/std-fee-update', this.state.dataObj)
+                .then((res) => {
+                    let result = "Updation Failed";
+                    if(res.affectedRows > 0){
+                        result="Updated succesfully!";
+                        this.fngetdata();
+                    }
+
+                    this.setState({
+                        dataObj: {
+                        name: '',
+                        uid: '',
+                        classes: '',
+                        fees: 'Jan-Mar'
+                      },
+                      result:result,
+                      isEdit:false
+                    })
+
+                    this.fnresetMsg();
+                })
+
+
+                .catch(()=>{
+                    this.setState({
+                        dataObj: {
+                        name: '',
+                        uid: '',
+                        classes: '',
+                        fees: 'Jan-Mar'
+                      },
+                      isEdit:false
+                    })
+                })
+        }
+
+
+        fndelete(data){
+            let ok=confirm("R u sure");
+            if(ok){
+                axios.get('http://localhost:2020/std/fee-delete?id='+data.id)
+                .then((res)=>{
+                    let result="Deletion Failed!";
+                    if(res.data.affectedRows > 0){
+                        result="Deleted Succesfully"
+                        this.fngetdata();
+                    }
+
+                    this.setState({
+                        dataObj: {
+                        name: '',
+                        uid: '',
+                        classes: '',
+                        fees: 'Jan-Mar'
+                      },
+                      result:result,
+                    })
+
+                    this.fnresetMsg();
+                })
+            }
+        }
+
+
+
+        fnOnchange(eve) {
+            const { name, value, type, checked } = eve.target;
+
+            if (type == "checkbox") {
+                if (checked) {
+                    this.cbArr.push(name);
+                }
+                else {
+                    this.cbArr.splice(this.cbArr.indexOf(name), 1);
+                }
+                let fees = this.cbArr.length;
+                this.setState({
+                    dataObj: {
+                        ...this.state.dataObj,
+                        "fees": this.cbArr.join()
+                    }
+                })
+            }
+            else {
+                this.setState({
+                    dataObj: {
+                        ...this.state.dataObj,
+                        [name]: value
+                    }
+                })
+            }
+        }
+
+        fngetdata() {
+            debugger;
+            fetch('http://localhost:2020/std/std-fee-data')
+                .then(response => response.json())
+                .then((data) => {
+                    this.setState({
+                        students: data
+                    })
+                    console.log(this.state.students)
+                    debugger;
+                });
+        }
+
+        componentDidMount() {
+            this.fngetdata();
+            //  console.log('fn called');
+        }
+
+        fnupdate(data) {
+            this.setState({
+                dataObj: data,
+                isEdit: true
+            })
+        }
+
+        fncancel() {
+            this.setState({
+                dataObj: {
+                    name: '',
+                    uid: '',
+                    classes: '',
+                    fees: 'Jan-Mar'
+                },
+                isEdit:false
+            })
+        }
+
+        render() {
+            // console.log('ren called');
+
+            const { name, uid, classes, fees } = this.state.dataObj;
+            const { cbArr } = this;
+            const { students, result, isEdit } = this.state;
+
+            let isjan = fees.includes('Jan-Mar');
+            let isapr = fees.includes('Apr-Jun');
+            let isJul = fees.includes('Jul-Sep');
+            let isoct = fees.includes('Oct-Dec');
+            return <div>
+                <h1 className="input">Fees:Payment Of Monthly Fees</h1>
+                <p>
+                    Name:<input className="input2" name="name" value={name} onChange={this.fnOnchange} />
+                </p>
+                <p>
+                    UID:<input name="uid" value={uid} className="input2" onChange={this.fnOnchange} />
+                </p>
+                <p>
+                    Class:<input name="classes" value={classes} className="input2" onChange={this.fnOnchange} />
+                </p>
+                <p>
+                    <b className="input">Months:</b><input type="checkbox" name="Jan-Mar" onChange={this.fnOnchange} checked={isjan} />January-March
+                    <input type="checkbox" name="Apr-Jun" checked={isapr} onChange={this.fnOnchange} />April-June
+                    <input type="checkbox" name="Jul-Sep" checked={isJul} onChange={this.fnOnchange} />July-September
+                    <input type="checkbox" name="Oct-Dec" checked={isoct} onChange={this.fnOnchange} />October-December
+                </p>
+
+                <p>
+                    {
+                        isEdit ? <div>
+                            <button onClick={this.fnEdit.bind(this)}>Update</button>
+                            <button onClick={this.fncancel.bind(this)}>cancel</button>
+                        </div>
+
+                            :
+
+                            <button className="input" disabled={this.state.isdisabled} onClick={this.fnfees}>Pay</button>
+                    }
+
+                </p>
+
+                {this.state.isdisabled && <span>processing....</span>}
+                <h2>{result}</h2>
+
+                <table border="2px">
+                    <thead>
+                        <tr>
+                            <th>id</th>
+                            <th>name</th>
+                            <th>uid</th>
+                            <th>class</th>
+                            <th>fees</th>
+                            <th>update</th>
+                            <th>delete</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {
+                            students.map((obj, index) => {
+                                return <tr key={index}>
+                                    <td>{obj.id}</td>
+                                    <td>{obj.name}</td>
+                                    <td>{obj.uid}</td>
+                                    <td>{obj.classes}</td>
+                                    <td>{obj.fees}</td>
+                                    <td><button onClick={this.fnupdate.bind(this, obj)}>update</button></td>
+                                    <td><button onClick={this.fndelete.bind(this,obj)}>delete</button></td>
+                                </tr>
+                            })
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+        }
+    }
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+
+</script>
